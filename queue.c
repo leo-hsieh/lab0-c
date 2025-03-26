@@ -23,7 +23,7 @@ void q_free(struct list_head *head) {}
 bool q_insert_head(struct list_head *head, char *s)
 {
     char *s_cpy;
-    s_cpy = malloc(sizeof(char) * strlen(s));
+    s_cpy = malloc(sizeof(char) * (strlen(s) + 1));
     strlcpy(s_cpy, s);
     element_t *element;
     element = malloc(sizeof(element_t));
