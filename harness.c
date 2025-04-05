@@ -255,6 +255,7 @@ void set_cautious_mode(bool cautious)
  */
 void set_noallocate_mode(bool noallocate)
 {
+    noallocate = false;
     noallocate_mode = noallocate;
 }
 

@@ -220,8 +220,51 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
+void merge(struct list_head *head, struct list_head *tail)
+{
+    head->prev->next = tail->next;
+    tail->next->prev = head->prev;
+    head->prev = tail->prev;
+    tail->prev->next = head;
+    free(tail);
+}
+
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    if (list_empty(head) || list_is_singular(head)) {
+        return;
+    }
+    struct list_head *pivot = head->next;
+    const char *pivot_str;
+    pivot_str = container_of(pivot, element_t, list)->value;
+    struct list_head *left;
+    left = malloc(sizeof(struct list_head));
+    struct list_head *right;
+    right = malloc(sizeof(struct list_head));
+    INIT_LIST_HEAD(left);
+    INIT_LIST_HEAD(right);
+    struct list_head *tmp;
+    for (struct list_head *node = head->next->next; node != head; node = tmp) {
+        const char *str = container_of(node, element_t, list)->value;
+        tmp = node->next;
+        if (atoi(pivot_str) >= atoi(str)) {
+            list_add(node, left);
+        } else {
+            list_add(node, right);
+        }
+    }
+    q_sort(left, descend);
+    q_sort(right, descend);
+    INIT_LIST_HEAD(head);
+    if (!list_empty(left)) {
+        merge(head, left);
+    }
+    list_add_tail(pivot, head);
+    if (!list_empty(right)) {
+        merge(head, right);
+    }
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
