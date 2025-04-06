@@ -220,8 +220,81 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
+void switch_node_to_left(struct list_head *node, struct list_head *pivot)
+{
+    if (pivot->prev == node) {
+        return;
+    }
+    struct list_head *pl = pivot->prev;
+    struct list_head *nl = node->prev;
+    struct list_head *nr = node->next;
+    nl->next = nr;
+    nr->prev = nl;
+    pl->next = node;
+    node->next = pivot;
+    node->prev = pl;
+    pivot->prev = node;
+}
+
+void switch_node_to_right(struct list_head *node, struct list_head *pivot)
+{
+    if (pivot->next == node) {
+        return;
+    }
+    struct list_head *pn = pivot->next;
+    struct list_head *nl = node->prev;
+    struct list_head *nr = node->next;
+    nl->next = nr;
+    nr->prev = nl;
+    pn->prev = node;
+    node->prev = pivot;
+    node->next = pn;
+    pivot->next = node;
+}
+
+void sperate(struct list_head *head, struct list_head *pivot)
+{
+    struct list_head *tmp = pivot->prev;
+    pivot->prev = head->prev;
+    pivot->prev->next = pivot;
+    head->prev = tmp;
+    tmp->next = head;
+}
+
+void add_queue_to_tail(struct list_head *list, struct list_head *head)
+{
+    struct list_head *old_tail = head->prev;
+    head->prev->next = list;
+    head->prev = list->prev;
+    list->prev->next = head;
+    list->prev = old_tail;
+}
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    if (list_empty(head) || list_is_singular(head)) {
+        return;
+    }
+    struct list_head *pivot = head->next;
+    const char *str_pivot = container_of(pivot, element_t, list)->value;
+    struct list_head *node = head->next->next;
+    int size = q_size(head);
+    struct list_head *tmp;
+    for (int i = 0; i < size - 1; i++) {
+        tmp = node->next;
+        const char *str = container_of(node, element_t, list)->value;
+        if ((atoi(str_pivot) >= atoi(str)) ^ descend) {
+            switch_node_to_left(node, pivot);
+        } else {
+            switch_node_to_right(node, pivot);
+        }
+        node = tmp;
+    }
+    sperate(head, pivot);
+    q_sort(head, descend);
+    q_sort(pivot, descend);
+    add_queue_to_tail(pivot, head);
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
